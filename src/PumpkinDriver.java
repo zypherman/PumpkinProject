@@ -9,11 +9,13 @@ public class PumpkinDriver {
     public static void main(String[] args) {
 
         //LinkedBlockingQueue object created with size 1
-        LinkedBlockingQueue<Order> orders = new LinkedBlockingQueue<Order>(100);
-        LinkedBlockingQueue<Pumpkin> pumpkins = new LinkedBlockingQueue<Pumpkin>(100);
+        //LinkedBlockingQueue<Order> orders = new LinkedBlockingQueue<Order>(100);
+        LinkedBlockingQueue<PumpkinThread.Pumpkin> pumpkins = new LinkedBlockingQueue<PumpkinThread.Pumpkin>();
+        LinkedBlockingQueue<PumpkinThread> pumpkinThreads = new LinkedBlockingQueue<PumpkinThread>(100);
 
-        new Thread(new OrderProducer(orders, pumpkins)).start();
-        new Thread(new Consumer(pumpkins, orders)).start();
+        //new Thread(new OrderProducer(pumpkins)).start();
+        new Thread(new PumpkinProducer(pumpkinThreads, pumpkins)).start();
+        new Thread(new PumpkinConsumer(pumpkins)).start();
 
     }
 }

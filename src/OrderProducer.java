@@ -9,13 +9,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class OrderProducer implements Runnable {
 
     //LinkedBlockingQueue object
-    private LinkedBlockingQueue<Order> orders;
-    private LinkedBlockingQueue<Pumpkin> pumpkins;
+    //private LinkedBlockingQueue<Order> orders;
+    private LinkedBlockingQueue<PumpkinThread> pumpkinThreads;
     private LoggingService loggingService;
 
-    public OrderProducer(LinkedBlockingQueue<Order> orders, LinkedBlockingQueue<Pumpkin> pumpkins) {
-        this.orders = orders;
-        this.pumpkins= pumpkins;
+    public OrderProducer(LinkedBlockingQueue<PumpkinThread> pumpkinThreads) {
+        //this.orders = orders;
+        this.pumpkinThreads = pumpkinThreads;
         this.loggingService = new LoggingService("Producer");
     }
 
@@ -25,9 +25,9 @@ public class OrderProducer implements Runnable {
             int i=1;
             while(i<=5){
                 //add item
-                orders.put(new Order("Order " + i));
-                loggingService.writeToConsole("Order" + i + " added.");
-                i++;
+//                orders.put(new Order("Order " + i));
+//                loggingService.writeToConsole("Order" + i + " added.");
+//                i++;
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
