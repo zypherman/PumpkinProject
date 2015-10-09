@@ -11,6 +11,7 @@ public class LoggingService {
 
     public LoggingService(String objectName) {
         this.objectName = objectName;
+        System.out.println("Logging Service started for: " + objectName);
     }
 
     public void writeToConsole(String event) {

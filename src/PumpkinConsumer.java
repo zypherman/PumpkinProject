@@ -5,22 +5,20 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Consumer class manages consuming objects from the queue that the producer is creating
  */
 //Consumer class that will consume or remove item from LinkedBlockingQueue object
-public class Consumer implements Runnable {
+public class PumpkinConsumer implements Runnable {
 
     //LinkedBlockingQueue object
-    private LinkedBlockingQueue<Order> orders;
-    private LinkedBlockingQueue<Pumpkin> pumpkins;
+//    private LinkedBlockingQueue<Order> orders;
+    private LinkedBlockingQueue<PumpkinThread.Pumpkin> pumpkins;
     private LoggingService loggingService;
 
     /**
      * Constructor for our consumer class
      * Needs to know the orders and pumpkins queues
      *
-     * @param pumpkins LinkedBlockingQueue<Pumpkin>
-     * @param orders LinkedBlockingQueue<Order>
+     * @param pumpkinThreads LinkedBlockingQueue<Pumpkin>
      */
-    public Consumer(LinkedBlockingQueue<Pumpkin> pumpkins, LinkedBlockingQueue<Order> orders) {
-        this.orders = orders;
+    public PumpkinConsumer(LinkedBlockingQueue<PumpkinThread.Pumpkin> pumpkins) {
         this.pumpkins = pumpkins;
         this.loggingService = new LoggingService("Consumer");
     }
@@ -28,11 +26,10 @@ public class Consumer implements Runnable {
     @Override
     public void run() {
         try {
-            int i = 1;
-            while (!orders.isEmpty()) {
-                //removes the item
-                Order s = orders.take();
-                loggingService.writeToConsole(s.toString() + " removed.");
+            while(true) {
+                if(!pumpkins.isEmpty()) {
+                    loggingService.writeToConsole(pumpkins.take().toString());
+                }
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
