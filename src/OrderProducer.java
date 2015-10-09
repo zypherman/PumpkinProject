@@ -3,15 +3,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Created By John Anderson
  * Producer class is vital for creating objects in the producer consumer modal
+ * Producer will mostly make pumpkins and add them to the queue
+ *
  */
-public class Producer implements Runnable {
+public class OrderProducer implements Runnable {
 
     //LinkedBlockingQueue object
-    private LinkedBlockingQueue<String> orders;
-    private LinkedBlockingQueue<String> pumpkins;
+    private LinkedBlockingQueue<Order> orders;
+    private LinkedBlockingQueue<Pumpkin> pumpkins;
     private LoggingService loggingService;
 
-    public Producer(LinkedBlockingQueue<String> orders,LinkedBlockingQueue<String> pumpkins) {
+    public OrderProducer(LinkedBlockingQueue<Order> orders, LinkedBlockingQueue<Pumpkin> pumpkins) {
         this.orders = orders;
         this.pumpkins= pumpkins;
         this.loggingService = new LoggingService("Producer");
@@ -23,8 +25,8 @@ public class Producer implements Runnable {
             int i=1;
             while(i<=5){
                 //add item
-                orders.put("A" + i);
-                loggingService.writeToConsole("A" + i + " added.");
+                orders.put(new Order("Order " + i));
+                loggingService.writeToConsole("Order" + i + " added.");
                 i++;
                 Thread.sleep(1000);
             }

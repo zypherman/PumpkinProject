@@ -8,18 +8,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Consumer implements Runnable {
 
     //LinkedBlockingQueue object
-    private LinkedBlockingQueue<String> orders;
-    private LinkedBlockingQueue<String> pumpkins;
+    private LinkedBlockingQueue<Order> orders;
+    private LinkedBlockingQueue<Pumpkin> pumpkins;
     private LoggingService loggingService;
 
     /**
      * Constructor for our consumer class
      * Needs to know the orders and pumpkins queues
      *
-     * @param pumpkins
-     * @param orders
+     * @param pumpkins LinkedBlockingQueue<Pumpkin>
+     * @param orders LinkedBlockingQueue<Order>
      */
-    public Consumer(LinkedBlockingQueue<String> pumpkins, LinkedBlockingQueue<String> orders) {
+    public Consumer(LinkedBlockingQueue<Pumpkin> pumpkins, LinkedBlockingQueue<Order> orders) {
         this.orders = orders;
         this.pumpkins = pumpkins;
         this.loggingService = new LoggingService("Consumer");
@@ -31,8 +31,8 @@ public class Consumer implements Runnable {
             int i = 1;
             while (!orders.isEmpty()) {
                 //removes the item
-                String s = orders.take();
-                loggingService.writeToConsole(s + " removed.");
+                Order s = orders.take();
+                loggingService.writeToConsole(s.toString() + " removed.");
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
