@@ -1,3 +1,6 @@
+import java.time.Duration;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * Created by John on 10/8/15.
  * This service will handle creating the random numbers for the program
@@ -7,8 +10,8 @@
  */
 public class RandomService {
 
-    private int variable1;
-    private  int variable2;
+    private long variable1;
+    private long variable2;
 
     /**
      * Constructor for the random class
@@ -21,7 +24,12 @@ public class RandomService {
         this.variable2 = j;
     }
 
-    public long getTime() {
-        return 5;
+    public Duration getTime() {
+        return Duration.ofSeconds(variable1);
+    }
+
+    public boolean flipCoin() {
+        if (ThreadLocalRandom.current().nextInt(1, 2 + 1) == 1) return true;
+        else return false;
     }
 }

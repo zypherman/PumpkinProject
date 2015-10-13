@@ -6,10 +6,9 @@ public class Pumpkin {
 
     //Empty Constructor for now
     public Pumpkin() {
-
     }
 
     public String toString() {
-        return "Pumpkin: ";
+        return "Pumpkin";
     }
 }
