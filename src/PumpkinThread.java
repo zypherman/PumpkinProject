@@ -1,3 +1,5 @@
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -6,22 +8,27 @@ import java.util.concurrent.LinkedBlockingQueue;
  * As well as move it to the ripe queue when its done growing so
  * it can be picked by the consumer thread
  */
-public class PumpkinThread implements Runnable {
+public class PumpkinThread extends Thread {
 
     private LinkedBlockingQueue<Pumpkin> ripePumpkins;
     private LoggingService loggingService;
-    private long timeGrowing;
+    private boolean grow = true;
 
     /**
      * Pumpkin Thread constructor
      * Takes in a linked blocked queue of ripe pumpkins
-     *
      * @param ripePumpkins LinkedBlockingQueue<Pumpkin>
      */
     public PumpkinThread(LinkedBlockingQueue<Pumpkin> ripePumpkins) {
-        this.timeGrowing = new RandomService(1, 2).getTime(); //Get the growing time from random service
-        this.ripePumpkins = ripePumpkins;
         loggingService = new LoggingService("Pumpkin Thread");
+        this.ripePumpkins = ripePumpkins;
+    }
+
+    /**
+     * Method to tell the thread to grow another pumpkin
+     */
+    public void stopGrow() {
+        grow = false;
     }
 
     /**
@@ -34,11 +41,14 @@ public class PumpkinThread implements Runnable {
     @Override
     public void run() {
         try {
-            Pumpkin pumpkin = new Pumpkin(); //New Pumpkin object being planted
-            loggingService.logEvent(Event.NEW_PLANT, System.currentTimeMillis()); //Log the event
-            Thread.sleep(timeGrowing); //Wait while the pumpkin grows
-            ripePumpkins.put(pumpkin); //These are ripe pumpkins this might be an array list
-            loggingService.logEvent(Event.RIPE_PUMPKIN, System.currentTimeMillis());
+            while(grow) {
+                Duration timeGrowing = new RandomService(45,2).getTime(); //Get new grow time
+                Pumpkin pumpkin = new Pumpkin(); //New Pumpkin object being planted
+                loggingService.logEvent(Event.NEW_PLANT, Instant.now()); //Log the event
+                Thread.sleep(timeGrowing.toMillis()); //Wait while the pumpkin grows
+                ripePumpkins.put(pumpkin); //These are ripe pumpkins
+                loggingService.logEvent(Event.RIPE_PUMPKIN, Instant.now());
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
