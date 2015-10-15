@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -9,29 +10,17 @@ public class PumpkinDriver {
     public static void main(String[] args) {
 
         //LinkedBlockingQueue object created with size 1
-        LinkedBlockingQueue<Thread> threads = new LinkedBlockingQueue<Thread>();
         LinkedBlockingQueue<Order> orders = new LinkedBlockingQueue<Order>(); //Orders
-        LinkedBlockingQueue<Pumpkin> pumpkins = new LinkedBlockingQueue<Pumpkin>(10000); //Pumpkin Stash
-        //LinkedBlockingQueue<PumpkinThread> pumpkinThreads = new LinkedBlockingQueue<PumpkinThread>();
+        LinkedBlockingQueue<Pumpkin> pumpkins = new LinkedBlockingQueue<Pumpkin>(PropertyLoader.getInstance().getValue("stashsize")); //Pumpkin Stash
         LinkedBlockingQueue<Pumpkin> ripePumpkins = new LinkedBlockingQueue<Pumpkin>();
-
-        //Start up jack
-        new Thread(new Jack()).start();
-        //Can produce orders all the time
-        OrderProducer orderProducer = new OrderProducer(orders);
-
-        //Can only produce pumpkins when jack is at the patch to plant
-        Thread pumpkinProducer = new Thread(new PumpkinProducer(pumpkins, ripePumpkins));
-        pumpkinProducer.start();
-        //Can only produce pumpkins when jack is at the patch to plant
-        PumpkinConsumer pumpkinConsumer = new PumpkinConsumer(pumpkins,ripePumpkins, orders);
-
-        //Can only consume orders when jack is processing orders
-        OrderConsumer orderConsumer = new OrderConsumer(pumpkins, orders);
-
-       // threads.put(new Thread(pumpkinProducer));
+        PropertyLoader propertyLoader = PropertyLoader.getInstance(); //Create our PropertyLoader instance
+        ArrayList<PumpkinThread> pumpkinThreads = new ArrayList<PumpkinThread>();
+        LinkedBlockingQueue<Log> log = new LinkedBlockingQueue<Log>();
 
 
-
+        //Start order producer process
+        new Thread(new Jack(pumpkins, ripePumpkins, orders, pumpkinThreads, log)).start();
+        new Thread(new OrderProducer(orders, log)).start();
+        new Thread(new FileIO(log, true)).start();
     }
 }

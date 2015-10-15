@@ -1,47 +1,60 @@
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created By John Anderson
- * Producer class is vital for creating objects in the producer consumer modal
- * Producer will mostly make pumpkins and add them to the queue
+ * Order producer class to create orders for jack to fill
  */
 public class OrderProducer implements Runnable {
 
-    //LinkedBlockingQueue object
     private LinkedBlockingQueue<Order> orders;
-    private LoggingService loggingService;
+    LinkedBlockingQueue<Log> log;
     private RandomService randomService;
-    private long startTime;
+    private Instant startTime;
     private int orderCount;
+    private int runtime;
+    private long delay;
 
-    public OrderProducer(LinkedBlockingQueue<Order> orders) {
-        this.loggingService = new LoggingService("Order Producer");
-        this.randomService = new RandomService(1, 2);
-        this.startTime = System.currentTimeMillis(); //Saves the start time of the whole thread
+
+    public OrderProducer(LinkedBlockingQueue<Order> orders, LinkedBlockingQueue<Log> log) {
+
+        this.delay = Duration.ofSeconds(PropertyLoader.getInstance().getValue("orderdelay")).toMillis();
+        this.randomService = new RandomService(PropertyLoader.getInstance().getValue("ordertime"),
+                PropertyLoader.getInstance().getValue("ordertimedistribution"));
+
+        this.runtime = PropertyLoader.getInstance().getValue("runtime");
+        this.log = log;
         this.orders = orders;
     }
 
     /**
-     * Check to see if 1 million time units have elapsed can
-     * Change the value to something in the property file for easy change
+     * Check to see if total time has elapsed can
+     * Uses the distance and instant classes
+     *
      * @return boolean
      */
-    public boolean elapsedTimeMax() {
-        return 1000000 < System.currentTimeMillis() - startTime;
+    private boolean checkTime() {
+        return (Duration.between(startTime, Instant.now()).toMinutes() > runtime);
     }
 
-    @Override //Run for 1 million units of time
+    /**
+     * Will run entire length of the program
+     * Will get the config value of the total runtime of the program
+     */
+    @Override
     public void run() {
         try {
-            while (elapsedTimeMax()) {
-                Thread.sleep(randomService.getTime()); //Wait random amount of time to spawn new order
+            //Wait a bit before placing orders
+            Thread.sleep(delay);
+            this.startTime = Instant.now(); //Set start time
+
+            while (!checkTime()) {
                 orders.put(new Order(orderCount));
                 orderCount++;
-                loggingService.logEvent(Event.ORDER_PLACED, System.currentTimeMillis());
+                log.put(new Log(Event.ORDER_PLACED)); //Write to log
+                Thread.sleep(randomService.getTime().toMillis()); //Wait random amount of time to spawn new order
             }
-
-            Thread.sleep(1000);
-
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
