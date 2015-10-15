@@ -4,45 +4,55 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created By John Anderson
- * Producer class to make orders for our program
+ * Order producer class to create orders for jack to fill
  */
 public class OrderProducer implements Runnable {
 
     private LinkedBlockingQueue<Order> orders;
-    private LoggingService loggingService;
+    LinkedBlockingQueue<Log> log;
     private RandomService randomService;
     private Instant startTime;
     private int orderCount;
+    private int runtime;
+    private long delay;
 
-    public OrderProducer(LinkedBlockingQueue<Order> orders) {
-        this.loggingService = new LoggingService("Order Generator");
-        this.randomService = new RandomService(5, 2);
+
+    public OrderProducer(LinkedBlockingQueue<Order> orders, LinkedBlockingQueue<Log> log) {
+
+        this.delay = Duration.ofSeconds(PropertyLoader.getInstance().getValue("orderdelay")).toMillis();
+        this.randomService = new RandomService(PropertyLoader.getInstance().getValue("ordertime"),
+                PropertyLoader.getInstance().getValue("ordertimedistribution"));
+
+        this.runtime = PropertyLoader.getInstance().getValue("runtime");
+        this.log = log;
         this.orders = orders;
     }
 
     /**
-     * Check to see if 10 min's have elapsed can
+     * Check to see if total time has elapsed can
      * Uses the distance and instant classes
+     *
      * @return boolean
      */
     private boolean checkTime() {
-        return (Duration.between(startTime, Instant.now()).toMinutes() > PropertyLoader.getInstance().getValue("runtime"));
+        return (Duration.between(startTime, Instant.now()).toMinutes() > runtime);
     }
 
     /**
      * Will run entire length of the program
-     * Once 10 min's has elapsed it will close
+     * Will get the config value of the total runtime of the program
      */
     @Override
     public void run() {
         try {
-            Thread.sleep(Duration.ofSeconds(PropertyLoader.getInstance().getValue("runtime")).toMillis()); //Wait a bit before placing orders
+            //Wait a bit before placing orders
+            Thread.sleep(delay);
             this.startTime = Instant.now(); //Set start time
 
             while (!checkTime()) {
                 orders.put(new Order(orderCount));
                 orderCount++;
-                loggingService.logEvent(Event.ORDER_PLACED, Instant.now());
+                log.put(new Log(Event.ORDER_PLACED)); //Write to log
                 Thread.sleep(randomService.getTime().toMillis()); //Wait random amount of time to spawn new order
             }
         } catch (InterruptedException e) {
